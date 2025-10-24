@@ -1,0 +1,63 @@
+{
+	"define": [
+		{
+			"id": "as_i386",
+			"description": "使用gas汇编器生成可执行文件",
+			"tool": "as",
+			"options": [
+				"--32"
+			]
+		},
+		{
+			"id": "cpp",
+			"tool": "gcc",
+			"options": [
+				"-E"
+			]
+		},
+		{
+			"id": "gcc_freestanding",
+			"tool": "gcc",
+			"options": [
+				"-Wall",
+				"-g",
+				"-std=c23",
+				"-ffreestanding",
+				"-fno-pic",
+				"-mno-sse",
+				"-mno-sse2",
+				"-mno-mmx"
+			]
+		},
+		{
+			"id": "ld_i386_binary",
+			"tool": "gcc",
+			"options": [
+				"--oformat binary",
+				"-m elf_i386"
+			]
+		},
+		{
+			"id": "gcc_x86_64",
+			"tool": "gcc",
+			"options": [
+				"-Wall",
+				"-g",
+				"-std=c23"
+			]
+		}
+	],
+	"compile": [
+		{
+			"project": "hello",
+			"procedure": [
+				{
+					"command_id": "gcc_x86_64",
+					"parameters": [
+						"hello.c"
+					]
+				}
+			]
+		}
+	]
+}
