@@ -31,7 +31,7 @@ namespace hy::json
 
 		this->type = src.type;
 		this->array.clear();
-		for (auto it = src.array.cbegin(); it != src.array.cend(); it++)
+		for (auto it = src.array.cbegin(); it != src.array.cend(); ++it)
 		{
 			JsonBase *ptr = nullptr;
 			switch ((*it)->type)
@@ -67,7 +67,7 @@ namespace hy::json
 
 		this->type = rhs.type;
 		this->array.clear();
-		for (auto it = rhs.array.cbegin(); it != rhs.array.cend(); it++)
+		for (auto it = rhs.array.cbegin(); it != rhs.array.cend(); ++it)
 		{
 			JsonBase *ptr = nullptr;
 			switch ((*it)->type)
@@ -105,7 +105,7 @@ namespace hy::json
 
 		this->type = src.type;
 		this->array.clear();
-		for (auto it = src.array.cbegin(); it != src.array.cend(); it++)
+		for (auto it = src.array.cbegin(); it != src.array.cend(); ++it)
 		{
 			JsonBase *ptr = nullptr;
 			switch ((*it)->type)
@@ -141,7 +141,7 @@ namespace hy::json
 
 		this->type = rhs.type;
 		this->array.clear();
-		for (auto it = rhs.array.cbegin(); it != rhs.array.cend(); it++)
+		for (auto it = rhs.array.cbegin(); it != rhs.array.cend(); ++it)
 		{
 			JsonBase *ptr = nullptr;
 			switch ((*it)->type)
@@ -171,7 +171,7 @@ namespace hy::json
 
 	JsonObject::~JsonObject()
 	{
-		for (auto it = this->array.cbegin(); it != this->array.cend(); it++)
+		for (auto it = this->array.cbegin(); it != this->array.cend(); ++it)
 		{
 			delete *it;
 		}
@@ -208,13 +208,13 @@ namespace hy::json
 		else
 		{
 			int index = 0;
-			for (; it != this->array.end(); it++)
+			for (; it != this->array.end(); ++it)
 			{
 				if (index == pos)
 				{
 					break;
 				}
-				index++;
+				++index;
 			}
 		}
 
@@ -263,7 +263,7 @@ namespace hy::json
 
 		int index = 0;
 		auto it = this->array.cbegin();
-		for (; it != this->array.end(); it++)
+		for (; it != this->array.end(); ++it)
 		{
 			if (index == pos)
 			{
@@ -312,11 +312,11 @@ namespace hy::json
 		this->array.insert(this->array.end(), ptr);
 	}
 
-	std::list<JsonBase> JsonObject::getValue()
+	std::list<JsonBase> JsonObject::cloneItems() const
 	{
 		std::list<JsonBase> result;
 
-		for (auto it = this->array.cbegin(); it != this->array.cend(); it++)
+		for (auto it = this->array.cbegin(); it != this->array.cend(); ++it)
 		{
 			JsonBase *ptr = nullptr;
 			switch ((*it)->type)
@@ -345,7 +345,7 @@ namespace hy::json
 		return result;
 	}
 
-	JsonBase &&JsonObject::operator[](std::size_t index)
+	JsonBase &JsonObject::operator[](std::size_t index)
 	{
 		if (this->type != JsonNodeType::Array)
 		{
@@ -360,42 +360,21 @@ namespace hy::json
 		}
 
 		std::size_t i = 0;
-		for (auto it = this->array.cbegin(); it != this->array.cend(); it++, i++)
+		for (auto it = this->array.begin(); it != this->array.end(); ++it, ++i)
 		{
 			if (i < index)
 			{
 				continue;
 			}
 
-			JsonBase *ptr = nullptr;
-			switch ((*it)->type)
-			{
-			case JsonNodeType::Number:
-				ptr = new JsonNumber(*(JsonNumber *)(*it));
-				break;
-			case JsonNodeType::String:
-				ptr = new JsonString(*(JsonString *)(*it));
-				break;
-			case JsonNodeType::Boolean:
-				ptr = new JsonBoolean(*(JsonBoolean *)(*it));
-				break;
-			case JsonNodeType::Null:
-				ptr = new JsonNull(*(JsonNull *)(*it));
-				break;
-			case JsonNodeType::Array:
-			case JsonNodeType::Object:
-				ptr = new JsonObject(*(JsonObject *)(*it));
-				break;
-			}
-
-			return std::move(*ptr);
+			return **it;
 		}
 
 		std::string msg = std::format("{0}: The argument 'index' is too big.", __FUNCTION__);
 		throw std::out_of_range(msg);
 	}
 
-	JsonBase &&JsonObject::operator[](const std::string &key)
+	JsonBase &JsonObject::operator[](const std::string &key)
 	{
 		if (this->type != JsonNodeType::Object)
 		{
@@ -403,33 +382,11 @@ namespace hy::json
 			throw std::invalid_argument(msg);
 		}
 
-		auto it = this->array.cbegin();
-		for (; it != this->array.cend(); it++)
+		for (auto it = this->array.begin(); it != this->array.end(); ++it)
 		{
 			if ((*it)->key == key)
 			{
-				JsonBase *ptr = nullptr;
-				switch ((*it)->type)
-				{
-				case JsonNodeType::Number:
-					ptr = new JsonNumber(*(JsonNumber *)(*it));
-					break;
-				case JsonNodeType::String:
-					ptr = new JsonString(*(JsonString *)(*it));
-					break;
-				case JsonNodeType::Boolean:
-					ptr = new JsonBoolean(*(JsonBoolean *)(*it));
-					break;
-				case JsonNodeType::Null:
-					ptr = new JsonNull(*(JsonNull *)(*it));
-					break;
-				case JsonNodeType::Array:
-				case JsonNodeType::Object:
-					ptr = new JsonObject(*(JsonObject *)(*it));
-					break;
-				}
-
-				return std::move(*ptr);
+				return **it;
 			}
 		}
 
@@ -449,7 +406,7 @@ namespace hy::json
 
 		auto it_lhs = lhs.array.cbegin();
 		auto it_rhs = rhs.array.cbegin();
-		for (int i = 0; i < lhs_array_size; i++, it_lhs++, it_rhs)
+		for (int i = 0; i < lhs_array_size; ++i, ++it_lhs, ++it_rhs)
 		{
 			if ((*it_lhs)->type != (*it_rhs)->type)
 			{
@@ -480,7 +437,7 @@ namespace hy::json
 				break;
 			case JsonNodeType::Array:
 			case JsonNodeType::Object:
-				if ((*(JsonObject *)(*it_lhs)).getValue() != (*(JsonObject *)(*it_rhs)).getValue())
+				if ((*(JsonObject *)(*it_lhs)).cloneItems() != (*(JsonObject *)(*it_rhs)).cloneItems())
 				{
 					return false;
 				}
@@ -542,7 +499,7 @@ namespace hy::json
 			{
 				sstream << ", ";
 			}
-			index++;
+			++index;
 		}
 
 		if (jsonObject.type == JsonNodeType::Array)
@@ -555,5 +512,125 @@ namespace hy::json
 		}
 
 		return os << sstream.str();
+	}
+
+	JsonObject::iterator JsonObject::begin()
+	{
+		return iterator(this, 0);
+	}
+
+	JsonObject::iterator JsonObject::end()
+	{
+		return iterator(this, array.size());
+	}
+
+	JsonObject::const_iterator JsonObject::cbegin()
+	{
+		return const_iterator(this, 0);
+	}
+
+	JsonObject::const_iterator JsonObject::cend()
+	{
+		return const_iterator(this, array.size());
+	}
+
+	JsonObject::iterator::iterator(JsonObject *container, int index)
+		: container(container), current(index)
+	{
+	}
+
+	JsonBase &JsonObject::iterator::operator*() const
+	{
+		int index = 0;
+		for (auto it = (*container).array.begin(); it != (*container).array.end(); ++it, ++index)
+		{
+			if (index == current)
+			{
+				return **it;
+			}
+			else
+			{
+				if (index < current)
+				{
+					continue;
+				}
+				else
+				{
+					std::string msg = std::format("{0}: 'index' should not more than 'array.size()'.", __FUNCTION__);
+					throw std::runtime_error(msg);
+				}
+			}
+		}
+
+		std::string msg = std::format("{0}: 'index' should not more than 'array.size()'.", __FUNCTION__);
+		throw std::runtime_error(msg);
+	}
+
+	JsonObject::iterator &JsonObject::iterator::operator++()
+	{
+		++current;
+		return *this;
+	}
+
+	JsonObject::iterator JsonObject::iterator::operator++(int)
+	{
+		iterator temp = *this;
+		++(*this);
+		return temp;
+	}
+
+	bool JsonObject::iterator::operator!=(const iterator &rhs) const
+	{
+		return current != rhs.current;
+	}
+
+	JsonObject::const_iterator::const_iterator(JsonObject *container, int index)
+		: container(container), current(index)
+	{
+	}
+
+	const JsonBase &JsonObject::const_iterator::operator*() const
+	{
+		int index = 0;
+		for (auto it = (*container).array.cbegin(); it != (*container).array.cend(); ++it, ++index)
+		{
+			if (index == current)
+			{
+				return **it;
+			}
+			else
+			{
+				if (index < current)
+				{
+					continue;
+				}
+				else
+				{
+					std::string msg = std::format("{0}: 'index' should not more than 'array.size()'.", __FUNCTION__);
+					throw std::runtime_error(msg);
+				}
+			}
+		}
+
+		std::string msg = std::format("{0}: 'index' should not more than 'array.size()'.", __FUNCTION__);
+		throw std::runtime_error(msg);
+	}
+
+	JsonObject::const_iterator &JsonObject::const_iterator::operator++()
+	{
+		++current;
+		return *this;
+	}
+
+	JsonObject::const_iterator JsonObject::const_iterator::operator++(int)
+	{
+		const_iterator temp = *this;
+		++(*this);
+		return temp;
+	}
+
+	bool JsonObject::const_iterator::operator!=(const const_iterator &rhs) const
+	{
+		return current != rhs.current;
 	}
 }

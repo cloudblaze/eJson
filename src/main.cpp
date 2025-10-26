@@ -17,7 +17,18 @@ int main()
 						 std::istreambuf_iterator<char>());
 
 		JsonAnalyzer jAnalyzer(json);
-		std::cout << jAnalyzer.getJsonObject() << std::endl;
+		// std::cout << jAnalyzer.getJsonObject() << std::endl;
+		JsonObject &&jObject = jAnalyzer.getJsonObject();
+
+		for (auto it = jObject.begin(); it != jObject.end(); it++)
+		{
+			(*it).setKey((*it).getKey() + "111");
+		}
+
+		for (auto it = jObject.cbegin(); it != jObject.cend(); it++)
+		{
+			std::cout << (*it).getKey() << std::endl;
+		}
 	}
 	catch (std::exception &e)
 	{

@@ -60,21 +60,56 @@ namespace hy::json
 		/// @param value 值
 		void Append(const JsonBase &value);
 
-		/// @brief 获取所有项
+		/// @brief 克隆所有项
 		/// @return
-		std::list<JsonBase> getValue();
+		std::list<JsonBase> cloneItems() const;
 
 		/// @brief 获取项
 		/// @param index 位置序号
 		/// @return 项
-		JsonBase &&operator[](std::size_t index);
+		JsonBase &operator[](std::size_t index);
 		/// @brief 获取项
 		/// @param key 关键字
 		/// @return 项
-		JsonBase &&operator[](const std::string &key);
+		JsonBase &operator[](const std::string &key);
 
 		friend bool operator==(const JsonObject &lhs, const JsonObject &rhs);
 		friend bool operator!=(const JsonObject &lhs, const JsonObject &rhs);
 		friend std::ostream &operator<<(std::ostream &os, const JsonObject &jsonObject);
+
+		class iterator
+		{
+		private:
+			JsonObject *container;
+			int current;
+
+		public:
+			iterator(JsonObject *container, int index);
+
+			JsonBase &operator*() const;
+			iterator &operator++();
+			iterator operator++(int);
+			bool operator!=(const iterator &rhs) const;
+		};
+
+		class const_iterator
+		{
+		private:
+			JsonObject *container;
+			int current;
+
+		public:
+			const_iterator(JsonObject *container, int index);
+
+			const JsonBase &operator*() const;
+			const_iterator &operator++();
+			const_iterator operator++(int);
+			bool operator!=(const const_iterator &rhs) const;
+		};
+
+		iterator begin();
+		iterator end();
+		const_iterator cbegin();
+		const_iterator cend();
 	};
 }
